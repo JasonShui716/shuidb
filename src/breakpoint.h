@@ -16,29 +16,30 @@
 
 #pragma once
 
-#include <sys/ptrace.h>
+#include <stdint.h>
+#include <unistd.h>
 
-#include <string>
-#include <unordered_map>
-
-#include "breakpoint.h"
+#include <atomic>
+#include <mutex>
 
 namespace shuidb {
 
-class Debugger {
+class BreakPoint {
  public:
-  Debugger(std::string prog, pid_t pid) : prog_(prog), pid_(pid){};
-  ~Debugger();
-  void Run();
+  BreakPoint() = default;
+  BreakPoint(pid_t pid, std::intptr_t addr)
+      : pid_(pid), addr_(addr), enabled_(false) {}
+  void Enable();
+  void Disable();
+  bool IsEnabled() const;
+  std::intptr_t GetAddress() const;
 
  private:
-  std::string prog_;
   pid_t pid_;
-  std::unordered_map<std::intptr_t, BreakPoint> breakpoints_;
-
-  void HandleCommand(const std::string& line);
-  void ContinueExecution();
-  void SetBreakPointAtAddress(std::intptr_t addr);
+  std::intptr_t addr_;
+  bool enabled_;
+  uint8_t original_data_;
+  //   std::mutex mutex_;
 };
 
 }  // namespace shuidb

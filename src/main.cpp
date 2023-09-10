@@ -14,6 +14,7 @@
  limitations under the License.
  */
 
+#include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -53,12 +54,14 @@ int main(int argc, char **argv) {
   if (pid == 0) {
     // child process
     signal(SIGHUP, [](int) { exit(0); });
+    personality(ADDR_NO_RANDOMIZE);
     ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
     execl(prog, prog, nullptr);
   } else if (pid > 0) {
     // parent process
     Debugger dbg(prog, pid);
     dbg.Run();
+    kill(pid, SIGTERM);
   } else {
     PR(ERROR) << "Fork failed";
     return -1;

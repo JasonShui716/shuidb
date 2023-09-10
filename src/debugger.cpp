@@ -18,6 +18,7 @@
 
 #include <sys/wait.h>
 
+#include "breakpoint.h"
 #include "linenoise.h"
 #include "output_utils.hpp"
 #include "string_utils.hpp"
@@ -48,6 +49,15 @@ void Debugger::HandleCommand(const std::string& line) {
              utils::starts_with(command, "exit")) {
     // FIXME: Not working fine, child process will continue to run
     exit(0);
+  } else if (utils::starts_with(command, "b")) {
+    std::string addr_str = args[1];
+    auto addr = std::stol(addr_str, 0, 16);
+    SetBreakPointAtAddress(addr);
+  } else if (utils::starts_with(command, "h")) {
+    PR(INFO) << "Commands:";
+    PR(INFO) << "c: continue";
+    PR(INFO) << "q: quit";
+    PR(INFO) << "b <addr>: set breakpoint at address <addr>";
   } else {
     PR(ERROR) << "Unknown command";
   }
@@ -58,6 +68,13 @@ void Debugger::ContinueExecution() {
 
   int wait_status;
   waitpid(pid_, &wait_status, 0);
+}
+
+void Debugger::SetBreakPointAtAddress(std::intptr_t addr) {
+  PR(INFO) << "Set breakpoint at address 0x" << std::hex << addr;
+  BreakPoint bp(pid_, addr);
+  bp.Enable();
+  breakpoints_[addr] = bp;
 }
 
 }  // namespace shuidb

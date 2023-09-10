@@ -12,5 +12,9 @@ file(GLOB UTIL_FILES "utils/**")
 file(GLOB SRC_FILES "src/*.cpp")
 add_executable(shuidb ${UTIL_FILES} ${SRC_FILES})
 target_include_directories(shuidb PUBLIC utils)
+target_compile_options(shuidb PRIVATE -g)
 
 target_link_libraries(shuidb linenoise)
+
+add_executable(hello_world examples/hello_world.cpp)
+target_link_options(hello_world PRIVATE -fno-pie)

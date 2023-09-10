@@ -14,31 +14,30 @@
  limitations under the License.
  */
 
-#pragma once
+#include "breakpoint.h"
 
 #include <sys/ptrace.h>
 
-#include <string>
-#include <unordered_map>
-
-#include "breakpoint.h"
-
 namespace shuidb {
 
-class Debugger {
- public:
-  Debugger(std::string prog, pid_t pid) : prog_(prog), pid_(pid){};
-  ~Debugger();
-  void Run();
+void BreakPoint::Enable() {
+  // std::lock_guard<std::mutex> lock(mutex_);
 
- private:
-  std::string prog_;
-  pid_t pid_;
-  std::unordered_map<std::intptr_t, BreakPoint> breakpoints_;
+  auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
+  original_data_ = data & 0xff;
+  uint64_t int3 = 0xcc;
+  uint64_t data_with_int3 = ((data & ~0xff) | int3);
+  ptrace(PTRACE_POKEDATA, pid_, addr_, data_with_int3);
+  enabled_ = true;
+};
 
-  void HandleCommand(const std::string& line);
-  void ContinueExecution();
-  void SetBreakPointAtAddress(std::intptr_t addr);
+void BreakPoint::Disable() {
+  // std::lock_guard<std::mutex> lock(mutex_);
+
+  auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
+  auto restored_data = ((data & ~0xff) | original_data_);
+  ptrace(PTRACE_POKEDATA, pid_, addr_, restored_data);
+  enabled_ = false;
 };
 
 }  // namespace shuidb

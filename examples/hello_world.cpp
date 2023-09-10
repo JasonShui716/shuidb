@@ -14,31 +14,10 @@
  limitations under the License.
  */
 
-#pragma once
+#include <iostream>
 
-#include <sys/ptrace.h>
-
-#include <string>
-#include <unordered_map>
-
-#include "breakpoint.h"
-
-namespace shuidb {
-
-class Debugger {
- public:
-  Debugger(std::string prog, pid_t pid) : prog_(prog), pid_(pid){};
-  ~Debugger();
-  void Run();
-
- private:
-  std::string prog_;
-  pid_t pid_;
-  std::unordered_map<std::intptr_t, BreakPoint> breakpoints_;
-
-  void HandleCommand(const std::string& line);
-  void ContinueExecution();
-  void SetBreakPointAtAddress(std::intptr_t addr);
-};
-
-}  // namespace shuidb
+int main() {
+  int i = 0;
+  std::cerr << "Hello, world! " << i << std::endl;
+  return 0;
+}
