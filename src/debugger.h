@@ -40,6 +40,7 @@ class Debugger {
   void HandleCommand(const std::string& line);
   void ContinueExecution();
   void SetBreakPointAtAddress(std::intptr_t addr);
+  void DumpRegisters();
 };
 
 }  // namespace shuidb

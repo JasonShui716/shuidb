@@ -21,6 +21,7 @@
 #include "breakpoint.h"
 #include "linenoise.h"
 #include "output_utils.hpp"
+#include "register_operator.h"
 #include "string_utils.hpp"
 
 namespace shuidb {
@@ -53,11 +54,15 @@ void Debugger::HandleCommand(const std::string& line) {
     std::string addr_str = args[1];
     auto addr = std::stol(addr_str, 0, 16);
     SetBreakPointAtAddress(addr);
+  } else if (utils::starts_with(command, "reg") ||
+             utils::starts_with(command, "info reg")) {
+    DumpRegisters();
   } else if (utils::starts_with(command, "h")) {
     PR(INFO) << "Commands:";
     PR(INFO) << "c: continue";
     PR(INFO) << "q: quit";
     PR(INFO) << "b <addr>: set breakpoint at address <addr>";
+    PR(INFO) << "reg: dump registers";
   } else {
     PR(ERROR) << "Unknown command";
   }
@@ -75,6 +80,11 @@ void Debugger::SetBreakPointAtAddress(std::intptr_t addr) {
   auto bp = std::make_shared<BreakPoint>(pid_, addr);
   bp->Enable();
   breakpoints_[addr] = bp;
+}
+
+void Debugger::DumpRegisters() {
+  PR(INFO) << "Registers:";
+  RegisterOperator::DumpRegisters(pid_);
 }
 
 }  // namespace shuidb
