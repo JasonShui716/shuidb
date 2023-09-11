@@ -39,7 +39,7 @@ class BreakPoint {
   std::intptr_t addr_;
   bool enabled_;
   uint8_t original_data_;
-  //   std::mutex mutex_;
+  std::mutex mutex_;
 };
 
 }  // namespace shuidb

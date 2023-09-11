@@ -72,8 +72,8 @@ void Debugger::ContinueExecution() {
 
 void Debugger::SetBreakPointAtAddress(std::intptr_t addr) {
   PR(INFO) << "Set breakpoint at address 0x" << std::hex << addr;
-  BreakPoint bp(pid_, addr);
-  bp.Enable();
+  auto bp = std::make_shared<BreakPoint>(pid_, addr);
+  bp->Enable();
   breakpoints_[addr] = bp;
 }
 

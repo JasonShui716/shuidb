@@ -21,7 +21,7 @@
 namespace shuidb {
 
 void BreakPoint::Enable() {
-  // std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
   original_data_ = data & 0xff;
@@ -32,7 +32,7 @@ void BreakPoint::Enable() {
 };
 
 void BreakPoint::Disable() {
-  // std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
   auto restored_data = ((data & ~0xff) | original_data_);

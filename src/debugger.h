@@ -18,6 +18,7 @@
 
 #include <sys/ptrace.h>
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -34,7 +35,7 @@ class Debugger {
  private:
   std::string prog_;
   pid_t pid_;
-  std::unordered_map<std::intptr_t, BreakPoint> breakpoints_;
+  std::unordered_map<std::intptr_t, std::shared_ptr<BreakPoint>> breakpoints_;
 
   void HandleCommand(const std::string& line);
   void ContinueExecution();
