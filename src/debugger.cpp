@@ -16,75 +16,107 @@
 
 #include "debugger.h"
 
+#include <sys/personality.h>
+#include <sys/ptrace.h>
 #include <sys/wait.h>
 
 #include "breakpoint.h"
-#include "linenoise.h"
 #include "output_utils.hpp"
 #include "register_operator.h"
-#include "string_utils.hpp"
 
 namespace shuidb {
 
 Debugger::~Debugger(){};
 
-void Debugger::Run() {
-  int wait_status;
-  waitpid(pid_, &wait_status, 0);
+void Debugger::RunProc() {
+  std::lock_guard<std::mutex> lock(mutex_);
 
-  char* line = nullptr;
-  while ((line = linenoise("shuidb> ")) != nullptr) {
-    HandleCommand(line);
-    linenoiseHistoryAdd(line);
-    linenoiseFree(line);
+  if (IsRunning()) {
+    PR(ERROR) << "Process is already running";
+    return;
   }
-}
 
-void Debugger::HandleCommand(const std::string& line) {
-  auto args = utils::split(line, ' ');
-  auto command = args[0];
-
-  if (utils::starts_with(command, "c")) {
-    ContinueExecution();
-  } else if (utils::starts_with(command, "q") ||
-             utils::starts_with(command, "exit")) {
-    // FIXME: Not working fine, child process will continue to run
-    exit(0);
-  } else if (utils::starts_with(command, "b")) {
-    std::string addr_str = args[1];
-    auto addr = std::stol(addr_str, 0, 16);
-    SetBreakPointAtAddress(addr);
-  } else if (utils::starts_with(command, "reg") ||
-             utils::starts_with(command, "info reg")) {
-    DumpRegisters();
-  } else if (utils::starts_with(command, "h")) {
-    PR(INFO) << "Commands:";
-    PR(INFO) << "c: continue";
-    PR(INFO) << "q: quit";
-    PR(INFO) << "b <addr>: set breakpoint at address <addr>";
-    PR(INFO) << "reg: dump registers";
+  auto pid = fork();
+  if (pid == 0) {
+    // child process
+    // disable ASLR
+    PR(INFO) << "Child process pid: " << getpid();
+    PR(INFO) << "Pausing...";
+    personality(ADDR_NO_RANDOMIZE);
+    ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
+    execl(prog_.c_str(), prog_.c_str(), nullptr);
+  } else if (pid >= 1) {
+    // parent process
+    int wait_status;
+    waitpid(pid_, &wait_status, 0);
+    SetRun(pid);
   } else {
-    PR(ERROR) << "Unknown command";
+    PR(ERROR) << "Fork failed";
+    exit(1);
   }
 }
 
 void Debugger::ContinueExecution() {
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  if (!IsRunning()) {
+    PR(ERROR) << "Process is not running";
+    return;
+  }
+  PR(INFO) << "Continue...";
   ptrace(PTRACE_CONT, pid_, nullptr, nullptr);
 
   int wait_status;
   waitpid(pid_, &wait_status, 0);
+  if (WIFEXITED(wait_status)) {
+    PR(INFO) << "Process exited";
+    SetStop();
+  } else if (WIFSTOPPED(wait_status)) {
+    PR(INFO) << "Process stopped";
+  } else {
+    PR(ERROR) << "Unknown wait status";
+  }
 }
 
 void Debugger::SetBreakPointAtAddress(std::intptr_t addr) {
+  std::lock_guard<std::mutex> lock(mutex_);
+
   PR(INFO) << "Set breakpoint at address 0x" << std::hex << addr;
   auto bp = std::make_shared<BreakPoint>(pid_, addr);
   bp->Enable();
   breakpoints_[addr] = bp;
 }
 
-void Debugger::DumpRegisters() {
+void Debugger::DumpRegisters() const {
+  if (!IsRunning()) {
+    PR(ERROR) << "Process is not running";
+    return;
+  }
+
   PR(INFO) << "Registers:";
   RegisterOperator::DumpRegisters(pid_);
 }
+
+void Debugger::Quit() {
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  PR(INFO) << "Quitting";
+  if (IsRunning()) {
+    kill(pid_, SIGTERM);
+    SetStop();
+  }
+}
+
+void Debugger::SetRun(pid_t pid) {
+  pid_ = pid;
+  running_ = true;
+}
+
+void Debugger::SetStop() {
+  pid_ = 0;
+  running_ = false;
+}
+
+bool Debugger::IsRunning() const { return running_ && pid_ != 0; }
 
 }  // namespace shuidb

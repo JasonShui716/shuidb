@@ -14,8 +14,6 @@
  limitations under the License.
  */
 
-#include <sys/personality.h>
-#include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -24,7 +22,9 @@
 
 #include "debugger.h"
 #include "fs_utils.hpp"
+#include "linenoise.h"
 #include "output_utils.hpp"
+#include "string_utils.hpp"
 
 using namespace shuidb;
 
@@ -33,7 +33,38 @@ static void handle_signal_quit(int signal) {
   exit(0);
 }
 
-int main(int argc, char **argv) {
+void handle_command(Debugger& dbg, const std::string& line) {
+  auto args = utils::split(line, ' ');
+  auto command = args[0];
+
+  if (utils::starts_with(command, "r") || utils::starts_with(command, "run")) {
+    // TODO: Currently, it will break at the entry point of the program
+    dbg.RunProc();
+  } else if (utils::starts_with(command, "c")) {
+    dbg.ContinueExecution();
+  } else if (utils::starts_with(command, "q") ||
+             utils::starts_with(command, "exit")) {
+    dbg.Quit();
+  } else if (utils::starts_with(command, "b")) {
+    std::string addr_str = args[1];
+    auto addr = std::stol(addr_str, 0, 16);
+    dbg.SetBreakPointAtAddress(addr);
+  } else if (utils::starts_with(command, "reg") ||
+             utils::starts_with(command, "info reg")) {
+    dbg.DumpRegisters();
+  } else if (utils::starts_with(command, "h")) {
+    PR(INFO) << "Commands:";
+    PR(INFO) << "c: continue";
+    PR(INFO) << "q: quit";
+    PR(INFO) << "r: run";
+    PR(INFO) << "b <addr>: set breakpoint at address <addr>";
+    PR(INFO) << "reg / info reg: dump registers";
+  } else {
+    PR(ERROR) << "Unknown command";
+  }
+}
+
+int main(int argc, char** argv) {
   signal(SIGINT, handle_signal_quit);
   signal(SIGTERM, handle_signal_quit);
 
@@ -50,20 +81,11 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  auto pid = fork();
-  if (pid == 0) {
-    // child process
-    signal(SIGHUP, [](int) { exit(0); });
-    personality(ADDR_NO_RANDOMIZE);
-    ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
-    execl(prog, prog, nullptr);
-  } else if (pid > 0) {
-    // parent process
-    Debugger dbg(prog, pid);
-    dbg.Run();
-    kill(pid, SIGTERM);
-  } else {
-    PR(ERROR) << "Fork failed";
-    return -1;
+  Debugger dbg(prog);
+  char* line = nullptr;
+  while ((line = linenoise("shuidb> ")) != nullptr) {
+    handle_command(dbg, line);
+    linenoiseHistoryAdd(line);
+    linenoiseFree(line);
   }
 }

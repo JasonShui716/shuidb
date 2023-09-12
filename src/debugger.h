@@ -19,6 +19,7 @@
 #include <sys/ptrace.h>
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -28,19 +29,25 @@ namespace shuidb {
 
 class Debugger {
  public:
+  Debugger(std::string prog) : prog_(prog), pid_(0){};
   Debugger(std::string prog, pid_t pid) : prog_(prog), pid_(pid){};
   ~Debugger();
-  void Run();
+  void RunProc();
+  void ContinueExecution();
+  void SetBreakPointAtAddress(std::intptr_t addr);
+  void DumpRegisters() const;
+  void Quit();
 
  private:
   std::string prog_;
-  pid_t pid_;
+  bool running_{false};
+  std::mutex mutex_;
+  pid_t pid_{0};
   std::unordered_map<std::intptr_t, std::shared_ptr<BreakPoint>> breakpoints_;
 
-  void HandleCommand(const std::string& line);
-  void ContinueExecution();
-  void SetBreakPointAtAddress(std::intptr_t addr);
-  void DumpRegisters();
+  void SetRun(pid_t pid);
+  void SetStop();
+  bool IsRunning() const;
 };
 
 }  // namespace shuidb
