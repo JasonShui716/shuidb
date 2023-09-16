@@ -14,22 +14,18 @@
  limitations under the License.
  */
 
-#pragma once
+#include "memory_operator.h"
 
-#include <unistd.h>
-
-#include "register_def.h"
+#include <sys/ptrace.h>
 
 namespace shuidb {
 
-class RegisterOperator {
- public:
-  static uint64_t GetRegisterValue(pid_t pid, Register reg);
-  static void SetRegisterValue(pid_t pid, Register reg, uint64_t value);
-  static uint64_t GetRegisterValueFromDwarfRegister(pid_t pid, int dwarf_r);
-  static std::string GetRegisterName(Register reg);
-  static Register GetRegisterFromName(const std::string& name);
-  static void DumpRegisters(pid_t pid);
-};
+void MemoryOperator::WriteMemory(pid_t pid, uint64_t addr, uint64_t data) {
+  ptrace(PTRACE_POKEDATA, pid, addr, data);
+}
+
+uint64_t MemoryOperator::ReadMemory(pid_t pid, uint64_t addr) {
+  return ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
+}
 
 }  // namespace shuidb

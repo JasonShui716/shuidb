@@ -17,19 +17,14 @@
 #pragma once
 
 #include <unistd.h>
-
-#include "register_def.h"
+#include <stdint.h>
 
 namespace shuidb {
 
-class RegisterOperator {
+class MemoryOperator {
  public:
-  static uint64_t GetRegisterValue(pid_t pid, Register reg);
-  static void SetRegisterValue(pid_t pid, Register reg, uint64_t value);
-  static uint64_t GetRegisterValueFromDwarfRegister(pid_t pid, int dwarf_r);
-  static std::string GetRegisterName(Register reg);
-  static Register GetRegisterFromName(const std::string& name);
-  static void DumpRegisters(pid_t pid);
+  static void WriteMemory(pid_t pid, uint64_t addr, uint64_t data);
+  static uint64_t ReadMemory(pid_t pid, uint64_t addr);
 };
 
 }  // namespace shuidb
