@@ -22,11 +22,11 @@
 #include <ranges>
 
 #include "debugger.h"
-#include "fs_utils.hpp"
 #include "linenoise.h"
-#include "output_utils.hpp"
-#include "string_utils.hpp"
-#include "type_def.hpp"
+#include "type_def.h"
+#include "utils/fs_utils.hpp"
+#include "utils/output_utils.hpp"
+#include "utils/string_utils.hpp"
 
 using namespace shuidb;
 

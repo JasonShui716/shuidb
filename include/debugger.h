@@ -24,7 +24,7 @@
 #include <unordered_map>
 
 #include "breakpoint.h"
-#include "type_def.hpp"
+#include "type_def.h"
 
 namespace shuidb {
 
