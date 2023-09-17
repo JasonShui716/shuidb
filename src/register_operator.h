@@ -18,6 +18,8 @@
 
 #include <unistd.h>
 
+#include <optional>
+
 #include "register_def.h"
 
 namespace shuidb {
@@ -28,8 +30,9 @@ class RegisterOperator {
   static void SetRegisterValue(pid_t pid, Register reg, uint64_t value);
   static uint64_t GetRegisterValueFromDwarfRegister(pid_t pid, int dwarf_r);
   static std::string GetRegisterName(Register reg);
-  static Register GetRegisterFromName(const std::string& name);
+  static std::optional<Register> GetRegisterFromName(const std::string& name);
   static void DumpRegisters(pid_t pid);
+  static bool IsRegisterValid(const std::string& reg_name);
 };
 
 }  // namespace shuidb

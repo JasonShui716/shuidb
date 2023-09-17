@@ -20,9 +20,12 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
+#include <iomanip>
+
 #include "breakpoint.h"
 #include "output_utils.hpp"
 #include "register_operator.h"
+#include "string_utils.hpp"
 
 namespace shuidb {
 
@@ -95,6 +98,40 @@ void Debugger::DumpRegisters() const {
 
   PR(INFO) << "Registers:";
   RegisterOperator::DumpRegisters(pid_);
+}
+
+StatusType Debugger::ReadRegister(const std::string& reg_name) const {
+  if (!IsRunning()) {
+    PR(ERROR) << "Process is not running";
+    return StatusType::kNotRunning;
+  }
+
+  auto reg = RegisterOperator::GetRegisterFromName(utils::trim(reg_name));
+  if (!reg.has_value()) {
+    PR(ERROR) << "Unknown register name " << reg_name;
+    return StatusType::kUnknownRegister;
+  }
+  auto reg_value = RegisterOperator::GetRegisterValue(pid_, reg.value());
+  PR(INFO) << reg_name << " 0x" << std::setfill('0') << std::setw(16)
+           << std::hex << reg_value;
+
+  return StatusType::kSuccess;
+}
+
+StatusType Debugger::WriteRegister(const std::string& reg_name,
+                                   const uint64_t& val) {
+  if (!IsRunning()) {
+    PR(ERROR) << "Process is not running";
+    return StatusType::kNotRunning;
+  }
+
+  auto reg = RegisterOperator::GetRegisterFromName(utils::trim(reg_name));
+  if (!reg.has_value()) {
+    PR(ERROR) << "Unknown register name " << reg_name;
+    return StatusType::kUnknownRegister;
+  };
+  RegisterOperator::SetRegisterValue(pid_, reg.value(), val);
+  return StatusType::kSuccess;
 }
 
 void Debugger::Quit() {

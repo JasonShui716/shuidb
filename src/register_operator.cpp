@@ -201,13 +201,13 @@ std::string RegisterOperator::GetRegisterName(Register reg) {
   return it->name;
 };
 
-Register RegisterOperator::GetRegisterFromName(const std::string& name) {
+std::optional<Register> RegisterOperator::GetRegisterFromName(const std::string& name) {
   auto it =
       std::find_if(kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
                    [name](const RegDescriptor& rd) { return rd.name == name; });
 
   if (it == kRegisterDescriptors.end()) {
-    throw std::runtime_error("Unknown register name");
+    return std::nullopt;
   }
 
   return it->reg;
@@ -219,6 +219,16 @@ void RegisterOperator::DumpRegisters(pid_t pid) {
     PR_RAW << rd.name << " 0x" << std::setfill('0') << std::setw(16) << std::hex
            << value;
   }
+};
+
+bool RegisterOperator::IsRegisterValid(const std::string& reg_name) {
+  auto it =
+      std::find_if(kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
+                   [reg_name](const RegDescriptor& rd) {
+                     return rd.name == reg_name;
+                   });
+
+  return it != kRegisterDescriptors.end();
 };
 
 }  // namespace shuidb

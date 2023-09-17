@@ -13,11 +13,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-
 #include <iostream>
+#include <ranges>
 
 int main() {
-  int i = 0;
-  std::cerr << "Hello, world! " << i << std::endl;
-  return 0;
+  const auto nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+  for (int i : std::ranges::drop_view{nums, 2}) std::cout << i << ' ';
+  std::cout << '\n';
+
+  for (int i : nums | std::views::drop(2)) std::cout << i << ' ';
+  std::cout << '\n';
+
+  for (int i : std::views::iota(1, 10) | std::views::drop(2))
+    std::cout << i << ' ';
+  std::cout << '\n';
 }

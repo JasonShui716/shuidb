@@ -16,17 +16,16 @@
 
 #pragma once
 
-#include <sys/stat.h>
-
-#include <string>
-
 namespace shuidb {
-namespace utils {
 
-inline bool file_exists(const std::string& path) {
-  struct stat buffer;
-  return (stat(path.c_str(), &buffer) == 0);
-}
+enum class OperationType { kRead, kWrite };
+enum class StatusType {
+  kSuccess,
+  kFailed,
+  kIncomplete,
+  kBadInput,
+  kNotRunning,
+  kUnknownRegister,
+};
 
-}  // namespace utils
 }  // namespace shuidb

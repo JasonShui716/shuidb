@@ -24,6 +24,7 @@
 #include <unordered_map>
 
 #include "breakpoint.h"
+#include "type_def.hpp"
 
 namespace shuidb {
 
@@ -36,6 +37,8 @@ class Debugger {
   void ContinueExecution();
   void SetBreakPointAtAddress(std::intptr_t addr);
   void DumpRegisters() const;
+  StatusType ReadRegister(const std::string& reg_name) const;
+  StatusType WriteRegister(const std::string& reg_name, const uint64_t& val);
   void Quit();
 
  private:

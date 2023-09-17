@@ -22,14 +22,15 @@
 namespace shuidb {
 namespace utils {
 
-std::vector<std::string> split(const std::string &s, char delimiter) {
+inline std::vector<std::string> split(const std::string &s,
+                               const std::string &delimiter) {
   std::vector<std::string> tokens;
   std::string::size_type start = 0;
   std::string::size_type end = s.find(delimiter);
 
   while (end != std::string::npos) {
     tokens.push_back(s.substr(start, end - start));
-    start = end + 1;
+    start = end + delimiter.size();
     end = s.find(delimiter, start);
   }
 
@@ -38,9 +39,22 @@ std::vector<std::string> split(const std::string &s, char delimiter) {
   return tokens;
 }
 
-bool starts_with(const std::string &s, const std::string &prefix) {
+inline std::vector<std::string> split(const std::string &s, char delimiter) {
+  return split(s, std::string(1, delimiter));
+}
+
+inline bool starts_with(const std::string &s, const std::string &prefix) {
   return s.size() >= prefix.size() &&
          std::equal(prefix.begin(), prefix.end(), s.begin());
+}
+
+inline std::string trim(const std::string &s) {
+  auto wsfront = std::find_if_not(s.begin(), s.end(),
+                                  [](int c) { return std::isspace(c); });
+  auto wsback = std::find_if_not(s.rbegin(), s.rend(), [](int c) {
+                  return std::isspace(c);
+                }).base();
+  return (wsback <= wsfront ? std::string() : std::string(wsfront, wsback));
 }
 
 }  // namespace utils
