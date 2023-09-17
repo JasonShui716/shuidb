@@ -23,9 +23,9 @@
 #include <iomanip>
 
 #include "breakpoint.h"
-#include "output_utils.hpp"
 #include "register_operator.h"
-#include "string_utils.hpp"
+#include "utils/output_utils.hpp"
+#include "utils/string_utils.hpp"
 
 namespace shuidb {
 

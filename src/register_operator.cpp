@@ -21,7 +21,7 @@
 
 #include <iomanip>
 
-#include "output_utils.hpp"
+#include "utils/output_utils.hpp"
 
 namespace shuidb {
 
@@ -201,7 +201,8 @@ std::string RegisterOperator::GetRegisterName(Register reg) {
   return it->name;
 };
 
-std::optional<Register> RegisterOperator::GetRegisterFromName(const std::string& name) {
+std::optional<Register> RegisterOperator::GetRegisterFromName(
+    const std::string& name) {
   auto it =
       std::find_if(kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
                    [name](const RegDescriptor& rd) { return rd.name == name; });
@@ -222,11 +223,9 @@ void RegisterOperator::DumpRegisters(pid_t pid) {
 };
 
 bool RegisterOperator::IsRegisterValid(const std::string& reg_name) {
-  auto it =
-      std::find_if(kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
-                   [reg_name](const RegDescriptor& rd) {
-                     return rd.name == reg_name;
-                   });
+  auto it = std::find_if(
+      kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
+      [reg_name](const RegDescriptor& rd) { return rd.name == reg_name; });
 
   return it != kRegisterDescriptors.end();
 };
