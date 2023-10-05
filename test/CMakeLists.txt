@@ -17,9 +17,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(debugger_test debugger_test.cpp)
 target_link_libraries(debugger_test gtest_main libshuidb)
-add_test(
-  NAME
-  debugger_test
-  COMMAND
-  ${CMAKE_BINARY_DIR}/test/debugger_test
-)
+
+include(GoogleTest)
+gtest_discover_tests(debugger_test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

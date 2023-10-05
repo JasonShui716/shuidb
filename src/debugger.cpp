@@ -24,12 +24,13 @@
 
 #include "breakpoint.h"
 #include "register_operator.h"
+#include "utils/fs_utils.hpp"
 #include "utils/output_utils.hpp"
 #include "utils/string_utils.hpp"
 
 namespace shuidb {
 
-Debugger::~Debugger(){};
+Debugger::~Debugger() { Quit(); };
 
 void Debugger::RunProc() {
   std::lock_guard<std::mutex> lock(mutex_);
@@ -39,11 +40,16 @@ void Debugger::RunProc() {
     return;
   }
 
+  if (!utils::file_exists(prog_)) {
+    PR(ERROR) << "File " << prog_ << " does not exist";
+    throw std::runtime_error("File does not exist");
+  }
+
   auto pid = fork();
   if (pid == 0) {
     // child process
     // disable ASLR
-    PR(INFO) << "Child process pid: " << getpid();
+    PR(INFO) << "Child process pid: " << std::dec << getpid();
     PR(INFO) << "Pausing...";
     personality(ADDR_NO_RANDOMIZE);
     ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
@@ -155,5 +161,7 @@ void Debugger::SetStop() {
 }
 
 bool Debugger::IsRunning() const { return running_ && pid_ != 0; }
+
+pid_t Debugger::GetPid() const { return pid_; }
 
 }  // namespace shuidb

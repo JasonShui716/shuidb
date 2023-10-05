@@ -39,6 +39,8 @@ class Debugger {
   void DumpRegisters() const;
   StatusType ReadRegister(const std::string& reg_name) const;
   StatusType WriteRegister(const std::string& reg_name, const uint64_t& val);
+  pid_t GetPid() const;
+  bool IsRunning() const;
   void Quit();
 
  private:
@@ -50,7 +52,6 @@ class Debugger {
 
   void SetRun(pid_t pid);
   void SetStop();
-  bool IsRunning() const;
 };
 
 }  // namespace shuidb

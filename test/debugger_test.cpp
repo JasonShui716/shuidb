@@ -19,17 +19,31 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "utils/ps_utils.hpp"
 
 namespace shuidb {
 class DebuggerTest : public ::testing::Test {
  protected:
   void SetUp() override {
     debugger_ = std::make_shared<Debugger>("./hello_world");
+    ASSERT_EQ(debugger_->IsRunning(), false);
+    debugger_->RunProc();
+    ASSERT_EQ(debugger_->IsRunning(), true);
   }
 
   std::shared_ptr<Debugger> debugger_;
 };
 
-TEST_F(DebuggerTest, RunProcTest) { debugger_->RunProc(); }
+TEST_F(DebuggerTest, ContinueTest) {
+  debugger_->ContinueExecution();
+  ASSERT_EQ(debugger_->IsRunning(), false);
+}
+
+TEST_F(DebuggerTest, BreakPointTest) {
+  debugger_->SetBreakPointAtAddress(
+      utils::GetProcessLoadAddress(debugger_->GetPid()) + 0x01220);
+  debugger_->ContinueExecution();
+  ASSERT_EQ(debugger_->IsRunning(), true);
+}
 
 }  // namespace shuidb
