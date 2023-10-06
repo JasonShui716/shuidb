@@ -1,5 +1,5 @@
 # shuidb
-Refer to  `https://blog.tartanllama.xyz/writing-a-linux-debugger-setup/`
+ `https://blog.tartanllama.xyz/writing-a-linux-debugger-setup/`
 
 But make it more OOP and modern
 
@@ -11,7 +11,9 @@ But make it more OOP and modern
 `sudo scripts/install_env.bash`
 
 ## Build
+*You can refer to `.github` to learn more*
 ```
+git submodule update --init
 mkdir build && cd build
 cmake ..
 make

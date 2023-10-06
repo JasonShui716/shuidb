@@ -34,9 +34,8 @@ target_link_libraries(libshuidbStatic libshuidb)
 
 add_executable(shuidb shuidb.cpp)
 target_link_libraries(shuidb linenoise libshuidb)
-add_executable(hello_world examples/hello_world.cpp)
-target_link_options(hello_world PRIVATE -fno-pie)
 
 # CTest related
 enable_testing()
+add_subdirectory(examples)
 add_subdirectory(test)
