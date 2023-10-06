@@ -25,7 +25,7 @@ namespace shuidb {
 class DebuggerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    debugger_ = std::make_shared<Debugger>("./hello_world");
+    debugger_ = std::make_shared<Debugger>("examples/hello_world");
     ASSERT_EQ(debugger_->IsRunning(), false);
     debugger_->RunProc();
     ASSERT_EQ(debugger_->IsRunning(), true);
