@@ -1,5 +1,10 @@
 # shuidb
- `https://blog.tartanllama.xyz/writing-a-linux-debugger-setup/`
+
+![shuidb logo](https://s1.imagehub.cc/images/2023/10/06/logo_white_background8ba95866c8148f0e.jpeg)
+
+A more simple & flexible debugger
+
+Begin with `https://blog.tartanllama.xyz/writing-a-linux-debugger-setup/`
 
 But make it more OOP and modern
 
