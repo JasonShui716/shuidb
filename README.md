@@ -16,7 +16,7 @@ But make it more OOP and modern
 `sudo scripts/install_env.bash`
 
 ## Build
-*You can refer to `.github` to learn more*
+*You can refer to `.github/workflows` to learn more*
 ```
 git submodule update --init
 mkdir build && cd build
