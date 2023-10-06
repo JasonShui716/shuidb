@@ -1,4 +1,4 @@
-# shuidb
+# shuidb [![Linux Build](https://github.com/JasonShui716/shuidb/actions/workflows/cmake-single-platform.yml/badge.svg)](https://github.com/JasonShui716/shuidb/actions/workflows/cmake-single-platform.yml)
 
 ![shuidb logo](https://s1.imagehub.cc/images/2023/10/06/logo_white_background8ba95866c8148f0e.jpeg)
 
