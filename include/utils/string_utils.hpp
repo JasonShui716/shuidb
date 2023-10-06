@@ -23,7 +23,7 @@ namespace shuidb {
 namespace utils {
 
 inline std::vector<std::string> split(const std::string &s,
-                               const std::string &delimiter) {
+                                      const std::string &delimiter) {
   std::vector<std::string> tokens;
   std::string::size_type start = 0;
   std::string::size_type end = s.find(delimiter);

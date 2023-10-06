@@ -23,7 +23,7 @@
 namespace shuidb {
 namespace utils {
 
-std::intptr_t GetProcessLoadAddress(pid_t pid) {
+inline std::intptr_t GetProcessLoadAddress(pid_t pid) {
   std::ifstream ifs("/proc/" + std::to_string(pid) + "/maps");
   std::string line;
   std::getline(ifs, line);

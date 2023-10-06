@@ -36,6 +36,7 @@ class Debugger {
   void RunProc();
   void ContinueExecution();
   void SetBreakPointAtAddress(std::intptr_t addr);
+  std::vector<std::intptr_t> GetBreakPoints() const;
   void DumpRegisters() const;
   StatusType ReadRegister(const std::string& reg_name) const;
   StatusType WriteRegister(const std::string& reg_name, const uint64_t& val);

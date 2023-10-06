@@ -26,6 +26,7 @@
 #include "register_operator.h"
 #include "utils/fs_utils.hpp"
 #include "utils/output_utils.hpp"
+#include "utils/ps_utils.hpp"
 #include "utils/string_utils.hpp"
 
 namespace shuidb {
@@ -90,10 +91,31 @@ void Debugger::ContinueExecution() {
 void Debugger::SetBreakPointAtAddress(std::intptr_t addr) {
   std::lock_guard<std::mutex> lock(mutex_);
 
+  auto base_load_addr = utils::GetProcessLoadAddress(pid_);
+  if (addr < base_load_addr) {
+    PR(WARNING) << "Address 0x" << std::hex << addr << " is not in the program";
+    addr += base_load_addr;
+    PR(WARNING) << "Try to plus the base load address 0x" << std::hex
+                << base_load_addr << ", get 0x" << std::hex << addr;
+  }
+
+  if (breakpoints_.find(addr) != breakpoints_.end()) {
+    PR(INFO) << "Breakpoint at address 0x" << std::hex << addr
+             << " already exists";
+    return;
+  }
+
   PR(INFO) << "Set breakpoint at address 0x" << std::hex << addr;
   auto bp = std::make_shared<BreakPoint>(pid_, addr);
   bp->Enable();
   breakpoints_[addr] = bp;
+}
+
+std::vector<std::intptr_t> Debugger::GetBreakPoints() const {
+  std::vector<std::intptr_t> bp_addrs;
+  std::ranges::transform(breakpoints_, std::back_inserter(bp_addrs),
+                         [](const auto& pair) { return pair.first; });
+  return bp_addrs;
 }
 
 void Debugger::DumpRegisters() const {
