@@ -40,8 +40,18 @@ TEST_F(DebuggerTest, ContinueTest) {
 }
 
 TEST_F(DebuggerTest, BreakPointTest) {
+  debugger_->SetBreakPointAtAddress(0x01220);
+  ASSERT_EQ(debugger_->GetBreakPoints().size(), 1);
+
+  // Should be same as above
   debugger_->SetBreakPointAtAddress(
       utils::GetProcessLoadAddress(debugger_->GetPid()) + 0x01220);
+  ASSERT_EQ(debugger_->GetBreakPoints().size(), 1);
+
+  // Different from above
+  debugger_->SetBreakPointAtAddress(0x01520);
+  ASSERT_EQ(debugger_->GetBreakPoints().size(), 2);
+
   debugger_->ContinueExecution();
   ASSERT_EQ(debugger_->IsRunning(), true);
 }

@@ -22,6 +22,7 @@
 
 #define PR(x) PR_##x
 #define PR_ERROR shuidb::utils::Print(std::cerr, shuidb::utils::Color::RED)
+#define PR_WARNING shuidb::utils::Print(std::cerr, shuidb::utils::Color::YELLOW)
 #define PR_INFO shuidb::utils::Print(std::cout, shuidb::utils::Color::CYAN)
 #define PR_RAW shuidb::utils::Print(std::cout, shuidb::utils::Color::RESET)
 
