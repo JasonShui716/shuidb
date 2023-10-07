@@ -56,4 +56,8 @@ TEST_F(DebuggerTest, BreakPointTest) {
   ASSERT_EQ(debugger_->IsRunning(), true);
 }
 
+TEST_F(DebuggerTest, DumpRegistersTest) {
+  debugger_->DumpRegisters();
+}
+
 }  // namespace shuidb

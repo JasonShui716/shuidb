@@ -1,0 +1,47 @@
+{
+  "configurations": [
+    
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "LLDB Launch",
+      "program": "${workspaceFolder}/build/shuidb",
+      "args": [
+        "${workspaceFolder}/build/hello_world"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/shuidb",
+      "args": [
+        "${workspaceFolder}/build/hello_world"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Test",
+          "text": "python import sys;sys.path.insert(0, '/usr/share/gcc/python');from libstdcxx.v6.printers import register_libstdcxx_printers;register_libstdcxx_printers(None)",
+          "ignoreFailures": false
+        },
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
