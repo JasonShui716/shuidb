@@ -20,10 +20,12 @@
 
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
 #include "breakpoint.h"
+#include "register_def.h"
 #include "type_def.h"
 
 namespace shuidb {
@@ -37,6 +39,7 @@ class Debugger {
   void ContinueExecution();
   void SetBreakPointAtAddress(std::intptr_t addr);
   std::vector<std::intptr_t> GetBreakPoints() const;
+  std::optional<std::unordered_map<Register, uint64_t>> GetRegisters() const;
   void DumpRegisters() const;
   StatusType ReadRegister(const std::string& reg_name) const;
   StatusType WriteRegister(const std::string& reg_name, const uint64_t& val);

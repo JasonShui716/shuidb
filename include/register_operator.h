@@ -16,9 +16,11 @@
 
 #pragma once
 
+#include <sys/user.h>
 #include <unistd.h>
 
 #include <optional>
+#include <unordered_map>
 
 #include "register_def.h"
 
@@ -26,13 +28,16 @@ namespace shuidb {
 
 class RegisterOperator {
  public:
-  static uint64_t GetRegisterValue(pid_t pid, Register reg);
+  static std::optional<std::unordered_map<Register, uint64_t>> GetRegisters(
+      pid_t pid);
+  static std::optional<uint64_t> GetRegisterValue(pid_t pid, Register reg);
+  static uint64_t GetRegisterValue(const user_regs_struct& regs,
+                                   const Register reg);
   static void SetRegisterValue(pid_t pid, Register reg, uint64_t value);
-  static uint64_t GetRegisterValueFromDwarfRegister(pid_t pid, int dwarf_r);
+  static std::optional<uint64_t> GetRegisterValueFromDwarfRegister(pid_t pid,
+                                                                   int dwarf_r);
   static std::string GetRegisterName(Register reg);
   static std::optional<Register> GetRegisterFromName(const std::string& name);
-  static void DumpRegisters(pid_t pid);
-  static bool IsRegisterValid(const std::string& reg_name);
 };
 
 }  // namespace shuidb

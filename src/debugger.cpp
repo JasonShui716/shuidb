@@ -118,14 +118,26 @@ std::vector<std::intptr_t> Debugger::GetBreakPoints() const {
   return bp_addrs;
 }
 
+std::optional<std::unordered_map<Register, uint64_t>> Debugger::GetRegisters()
+    const {
+  if (!IsRunning()) {
+    PR(ERROR) << "Process is not running";
+    return std::nullopt;
+  }
+  return RegisterOperator::GetRegisters(pid_);
+}
+
 void Debugger::DumpRegisters() const {
   if (!IsRunning()) {
     PR(ERROR) << "Process is not running";
     return;
   }
-
+  auto registers_map = GetRegisters();
   PR(INFO) << "Registers:";
-  RegisterOperator::DumpRegisters(pid_);
+  for (const auto& [reg, val] : registers_map.value()) {
+    PR(RAW) << RegisterOperator::GetRegisterName(reg) << " 0x" << std::hex
+            << std::setfill('0') << std::setw(16) << val;
+  }
 }
 
 StatusType Debugger::ReadRegister(const std::string& reg_name) const {
@@ -140,8 +152,12 @@ StatusType Debugger::ReadRegister(const std::string& reg_name) const {
     return StatusType::kUnknownRegister;
   }
   auto reg_value = RegisterOperator::GetRegisterValue(pid_, reg.value());
+  if (!reg_value.has_value()) {
+    PR(ERROR) << "Failed to get register value";
+    return StatusType::kFailed;
+  }
   PR(INFO) << reg_name << " 0x" << std::setfill('0') << std::setw(16)
-           << std::hex << reg_value;
+           << std::hex << reg_value.value();
 
   return StatusType::kSuccess;
 }

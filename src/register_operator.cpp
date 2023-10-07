@@ -19,15 +19,39 @@
 #include <sys/ptrace.h>
 #include <sys/user.h>
 
-#include <iomanip>
+#include <cstdint>
+#include <unordered_map>
 
-#include "utils/output_utils.hpp"
+#include "register_def.h"
 
 namespace shuidb {
 
-uint64_t RegisterOperator::GetRegisterValue(pid_t pid, Register reg) {
+std::optional<std::unordered_map<Register, uint64_t>>
+RegisterOperator::GetRegisters(pid_t pid) {
   user_regs_struct regs;
-  ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
+  if (ptrace(PTRACE_GETREGS, pid, nullptr, &regs) == -1) {
+    return std::nullopt;
+  }
+
+  std::unordered_map<Register, uint64_t> registers;
+  for (const auto& rd : kRegisterDescriptors) {
+    registers[rd.reg] = RegisterOperator::GetRegisterValue(pid, rd.reg).value();
+  }
+  return registers;
+};
+
+std::optional<uint64_t> RegisterOperator::GetRegisterValue(pid_t pid,
+                                                           Register reg) {
+  user_regs_struct regs;
+  if (ptrace(PTRACE_GETREGS, pid, nullptr, &regs) == -1) {
+    return std::nullopt;
+  }
+
+  return RegisterOperator::GetRegisterValue(regs, reg);
+};
+
+uint64_t RegisterOperator::GetRegisterValue(const user_regs_struct& regs,
+                                            const Register reg) {
   switch (reg) {
     case Register::RAX:
       return regs.rax;
@@ -176,8 +200,8 @@ void RegisterOperator::SetRegisterValue(pid_t pid, Register reg,
   ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
 };
 
-uint64_t RegisterOperator::GetRegisterValueFromDwarfRegister(pid_t pid,
-                                                             int dwarf_r) {
+std::optional<uint64_t> RegisterOperator::GetRegisterValueFromDwarfRegister(
+    pid_t pid, int dwarf_r) {
   auto it = std::find_if(
       kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
       [dwarf_r](const RegDescriptor& rd) { return rd.dwarf_r == dwarf_r; });
@@ -212,22 +236,6 @@ std::optional<Register> RegisterOperator::GetRegisterFromName(
   }
 
   return it->reg;
-};
-
-void RegisterOperator::DumpRegisters(pid_t pid) {
-  for (const auto& rd : kRegisterDescriptors) {
-    auto value = GetRegisterValue(pid, rd.reg);
-    PR_RAW << rd.name << " 0x" << std::setfill('0') << std::setw(16) << std::hex
-           << value;
-  }
-};
-
-bool RegisterOperator::IsRegisterValid(const std::string& reg_name) {
-  auto it = std::find_if(
-      kRegisterDescriptors.begin(), kRegisterDescriptors.end(),
-      [reg_name](const RegDescriptor& rd) { return rd.name == reg_name; });
-
-  return it != kRegisterDescriptors.end();
 };
 
 }  // namespace shuidb
