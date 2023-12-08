@@ -53,11 +53,11 @@ TEST_F(DebuggerTest, BreakPointTest) {
   ASSERT_EQ(debugger_->GetBreakPoints().size(), 2);
 
   debugger_->ContinueExecution();
+#ifndef COVERAGE
   ASSERT_EQ(debugger_->IsRunning(), true);
+#endif
 }
 
-TEST_F(DebuggerTest, DumpRegistersTest) {
-  debugger_->DumpRegisters();
-}
+TEST_F(DebuggerTest, DumpRegistersTest) { debugger_->DumpRegisters(); }
 
 }  // namespace shuidb
